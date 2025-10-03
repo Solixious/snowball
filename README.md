@@ -34,10 +34,10 @@ POSTGRES_USER=myuser
 POSTGRES_PASSWORD=secret
 KITE_API_KEY=your_kite_api_key
 KITE_API_SECRET=your_kite_api_secret
-KITE_USER=your_kite_user_id
+KITE_USER_ID=your_kite_user_id
 ```
 
-- `KITE_API_KEY`, `KITE_API_SECRET`, and `KITE_USER` are required for Zerodha Kite live trading integration.
+- `KITE_API_KEY`, `KITE_API_SECRET`, and `KITE_USER_ID` are required for Zerodha Kite live trading integration.
 
 ### Running the Database
 Start PostgreSQL with Docker Compose (data will persist across restarts):
