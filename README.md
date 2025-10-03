@@ -27,7 +27,7 @@ An open source web-based trading bot for Indian markets.
 The application uses environment variables for configuration. You can set them in your shell or in a `.env` file:
 
 ```
-DB_URL=jdbc:postgresql://localhost:5432/snowball
+DB_URL=jdbc:postgresql://localhost:5433/snowball
 DB_USERNAME=myuser
 DB_PASSWORD=secret
 POSTGRES_USER=myuser
