@@ -1,4 +1,4 @@
-package dev.indian.snowball.model;
+package dev.indian.snowball.model.auth;
 
 import lombok.Getter;
 import org.springframework.security.core.Authentication;

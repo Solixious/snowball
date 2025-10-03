@@ -1,7 +1,7 @@
 package dev.indian.snowball.controller;
 
 import dev.indian.snowball.constants.UrlPath;
-import dev.indian.snowball.model.KiteAuthentication;
+import dev.indian.snowball.model.auth.KiteAuthentication;
 import dev.indian.snowball.service.KiteService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
