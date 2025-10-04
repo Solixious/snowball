@@ -33,7 +33,8 @@ public class WatchlistService {
 
     public List<Instrument> searchInstruments(String query) {
         return kiteService.getInstruments(true).stream()
-                .filter(i -> i.getName() != null && i.getName().toLowerCase().contains(query.toLowerCase()))
+                .filter(i -> (i.getName() != null && i.getName().toLowerCase().startsWith(query.toLowerCase()))
+                        || (i.getTradingSymbol() != null && i.getTradingSymbol().toLowerCase().startsWith(query.toLowerCase())))
                 .toList();
     }
 
