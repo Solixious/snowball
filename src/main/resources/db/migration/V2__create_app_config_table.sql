@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS app_config (
+    id BIGSERIAL PRIMARY KEY,
+    config_key VARCHAR(100) NOT NULL UNIQUE,
+    config_value VARCHAR(500) NOT NULL
+);
