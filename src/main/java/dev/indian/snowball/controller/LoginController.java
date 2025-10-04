@@ -1,8 +1,10 @@
 package dev.indian.snowball.controller;
 
+import dev.indian.snowball.constants.AppConfigKey;
 import dev.indian.snowball.constants.UrlPath;
 import dev.indian.snowball.model.auth.KiteAuthentication;
 import dev.indian.snowball.service.KiteService;
+import dev.indian.snowball.service.AppConfigService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class LoginController {
 
     private final KiteService kiteService;
+    private final AppConfigService appConfigService;
 
     @GetMapping
     public String redirectToKiteLogin() {
@@ -35,6 +38,9 @@ public class LoginController {
             try {
                 KiteAuthentication authentication = kiteService.generateSession(requestToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                // Store request_token in app configs
+                appConfigService.setConfigValue(AppConfigKey.REQUEST_TOKEN, requestToken);
 
                 // Create a session if one doesn't exist
                 HttpSession session = request.getSession(true);
