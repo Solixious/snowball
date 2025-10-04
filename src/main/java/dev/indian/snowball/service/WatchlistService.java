@@ -21,10 +21,7 @@ public class WatchlistService {
     }
 
     public void addStock(String instrumentToken) {
-        WatchlistEntity entity = new WatchlistEntity();
-        entity.setInstrumentToken(instrumentToken);
-        entity.setAddedAt(LocalDateTime.now());
-        watchlistRepository.save(entity);
+        watchlistRepository.save(new WatchlistEntity(instrumentToken));
     }
 
     public void removeStock(Long id) {
