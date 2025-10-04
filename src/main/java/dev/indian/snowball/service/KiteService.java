@@ -7,6 +7,7 @@ import com.zerodhatech.models.GTT;
 import com.zerodhatech.models.GTTParams;
 import com.zerodhatech.models.OrderParams;
 import com.zerodhatech.models.User;
+import dev.indian.snowball.constants.AppConfigKey;
 import dev.indian.snowball.constants.Segment;
 import dev.indian.snowball.model.auth.KiteAuthentication;
 import dev.indian.snowball.model.kite.*;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class KiteService {
 
     private final KiteConnect kiteConnect;
+    private final AppConfigService appConfigService;
 
     @Value("${kite.api.key}")
     private String apiKey;
@@ -42,17 +44,33 @@ public class KiteService {
         return kiteConnect.getLoginURL();
     }
 
-    public KiteAuthentication generateSession(final String requestToken) {
+    public KiteAuthentication generateKiteSession(final String requestToken) {
         try {
             User user = kiteConnect.generateSession(requestToken, apiSecret);
             kiteConnect.setAccessToken(user.accessToken);
             kiteConnect.setPublicToken(user.publicToken);
             kiteConnect.setSessionExpiryHook(this::logout);
+
+            appConfigService.setConfigValue(AppConfigKey.ACCESS_TOKEN, user.accessToken);
+            appConfigService.setConfigValue(AppConfigKey.PUBLIC_TOKEN, user.publicToken);
+            appConfigService.setConfigValue(AppConfigKey.LOGIN_TIME, java.time.Instant.now().toString());
+
             return new KiteAuthentication(userId, user.shortName, apiKey, user.accessToken, user.publicToken);
 
         } catch (Exception | KiteException e) {
             throw new RuntimeException("Failed to generate session", e);
         }
+    }
+
+    public KiteAuthentication resumeKiteSession() {
+        String accessToken = appConfigService.getConfigValue(AppConfigKey.ACCESS_TOKEN).orElse(null);
+        String publicToken = appConfigService.getConfigValue(AppConfigKey.PUBLIC_TOKEN).orElse(null);
+        if (accessToken == null || publicToken == null) {
+            return null;
+        }
+        kiteConnect.setAccessToken(accessToken);
+        kiteConnect.setPublicToken(publicToken);
+        return new KiteAuthentication(userId, null, apiKey, accessToken, publicToken);
     }
 
     public void logout() {

@@ -1,5 +1,7 @@
 package dev.indian.snowball.constants;
 
 public enum AppConfigKey {
-    REQUEST_TOKEN,
+    ACCESS_TOKEN,
+    PUBLIC_TOKEN,
+    LOGIN_TIME,
 }
