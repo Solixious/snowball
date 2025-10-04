@@ -11,17 +11,20 @@ import dev.indian.snowball.constants.AppConfigKey;
 import dev.indian.snowball.constants.Segment;
 import dev.indian.snowball.model.auth.KiteAuthentication;
 import dev.indian.snowball.model.kite.*;
+import dev.indian.snowball.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class KiteService {
 
     private final KiteConnect kiteConnect;
     private final AppConfigService appConfigService;
+    private final InstrumentCacheService instrumentCacheService;
 
     @Value("${kite.api.key}")
     private String apiKey;
@@ -101,12 +105,27 @@ public class KiteService {
         }
     }
 
-    public List<Instrument> getInstruments() {
+    public List<Instrument> getInstruments(boolean useCache) {
+        if (useCache) {
+            String cacheTimeStr = appConfigService.getConfigValue(AppConfigKey.INSTRUMENT_CACHE_TIME).orElse(null);
+            // Fetch from cache if within 24 hours
+            if (TimeUtil.isWithinDuration(cacheTimeStr, Duration.ofHours(24))) {
+                List<Instrument> cached = instrumentCacheService.getAllInstruments();
+                if (!cached.isEmpty()) {
+                    return cached;
+                }
+            }
+        }
         try {
-            return kiteConnect.getInstruments()
+            List<Instrument> instruments = kiteConnect.getInstruments()
                     .stream()
                     .map(Instrument::toInstrument)
                     .toList();
+            CompletableFuture.runAsync(() -> {
+                instrumentCacheService.saveAllInstruments(instruments);
+                appConfigService.setConfigValue(AppConfigKey.INSTRUMENT_CACHE_TIME, java.time.Instant.now().toString());
+            });
+            return instruments;
         } catch (KiteException | IOException e) {
             throw new RuntimeException("Failed to fetch instruments", e);
         }

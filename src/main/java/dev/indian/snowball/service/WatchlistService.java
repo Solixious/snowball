@@ -21,7 +21,10 @@ public class WatchlistService {
     }
 
     public void addStock(String instrumentToken) {
-        watchlistRepository.save(new WatchlistEntity(instrumentToken));
+        // Add only if not already present
+        if (watchlistRepository.findByInstrumentToken(instrumentToken).isEmpty()) {
+            watchlistRepository.save(new WatchlistEntity(instrumentToken));
+        }
     }
 
     public void removeStock(Long id) {
@@ -29,14 +32,14 @@ public class WatchlistService {
     }
 
     public List<Instrument> searchInstruments(String query) {
-        return kiteService.getInstruments().stream()
+        return kiteService.getInstruments(true).stream()
                 .filter(i -> i.getName() != null && i.getName().toLowerCase().contains(query.toLowerCase()))
                 .toList();
     }
 
     public List<WatchlistDisplayDTO> getAllDisplay() {
         List<WatchlistEntity> entities = watchlistRepository.findAll();
-        List<Instrument> instruments = kiteService.getInstruments();
+        List<Instrument> instruments = kiteService.getInstruments(true);
         return entities.stream().map(entity -> {
             Instrument instrument = instruments.stream()
                 .filter(i -> String.valueOf(i.getInstrumentToken()).equals(entity.getInstrumentToken()))
