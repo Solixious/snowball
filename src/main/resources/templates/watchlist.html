@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Watchlist</title>
+    <style>
+        .search-results { border: 1px solid #ccc; max-height: 200px; overflow-y: auto; position: absolute; background: #fff; width: 300px; }
+        .search-result-item { padding: 5px; cursor: pointer; }
+        .search-result-item:hover { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+<h1>Watchlist</h1>
+
+<div style="position:relative; width:300px;">
+    <input type="text" id="instrument-search" placeholder="Search instrument name..." autocomplete="off" style="width:100%;" />
+    <div id="search-results" class="search-results" style="display:none;"></div>
+</div>
+
+<form id="add-form" th:action="@{/watchlist/add}" method="post" style="margin-top:10px;">
+    <input type="hidden" id="instrument-token" name="instrumentToken" />
+</form>
+
+<table style="margin-top:30px;">
+    <thead>
+    <tr>
+        <th>Stock Name</th>
+        <th>Trading Symbol</th>
+        <th>Added At</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="stock : ${watchlist}">
+        <td th:text="${stock.name}"></td>
+        <td th:text="${stock.tradingSymbol}"></td>
+        <td th:text="${#temporals.format(stock.addedAt, 'yyyy-MM-dd HH:mm')}"></td>
+        <td>
+            <form th:action="@{/watchlist/remove}" method="post" style="display:inline;">
+                <input type="hidden" name="id" th:value="${stock.id}" />
+                <button type="submit">Remove</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    const searchBox = document.getElementById('instrument-search');
+    const resultsBox = document.getElementById('search-results');
+    // Removed selectedInstrument reference
+    const instrumentTokenInput = document.getElementById('instrument-token');
+
+    searchBox.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length < 2) {
+            resultsBox.style.display = 'none';
+            return;
+        }
+        fetch(`/watchlist/search?query=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                resultsBox.innerHTML = '';
+                if (data.length === 0) {
+                    resultsBox.style.display = 'none';
+                    return;
+                }
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'search-result-item';
+                    div.textContent = `${item.name} (${item.tradingSymbol})`;
+                    div.dataset.token = item.instrumentToken;
+                    div.onclick = function() {
+                        instrumentTokenInput.value = this.dataset.token;
+                        resultsBox.style.display = 'none';
+                        searchBox.value = '';
+                        // Submit the form automatically
+                        document.getElementById('add-form').submit();
+                    };
+                    resultsBox.appendChild(div);
+                });
+                resultsBox.style.display = 'block';
+            });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchBox.contains(e.target) && !resultsBox.contains(e.target)) {
+            resultsBox.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>
