@@ -6,7 +6,7 @@ import java.time.ZoneId;
 
 public class TokenUtil {
 
-    public static boolean isLoginToday(String loginTime) {
+    public static boolean isLastLoginToday(String loginTime) {
         if (loginTime == null) return false;
         try {
             Instant loginInstant = Instant.parse(loginTime);

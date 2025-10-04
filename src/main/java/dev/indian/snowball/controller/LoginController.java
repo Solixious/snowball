@@ -28,7 +28,7 @@ public class LoginController {
     @GetMapping
     public String redirectToKiteLogin(HttpServletRequest request) {
         String loginTime = appConfigService.getConfigValue(AppConfigKey.LOGIN_TIME).orElse(null);
-        if (TokenUtil.isLoginToday(loginTime)) {
+        if (TokenUtil.isLastLoginToday(loginTime)) {
             KiteAuthentication authentication = kiteService.resumeKiteSession();
             if (authentication != null) {
                 return createSessionAndRedirect(request, authentication);
