@@ -9,6 +9,8 @@ import dev.indian.snowball.model.strategy.TradingStrategy;
 import dev.indian.snowball.rule.TradingStrategyRuleParser;
 import org.ta4j.core.Rule;
 import org.ta4j.core.BarSeries;
+import org.ta4j.core.BaseStrategy;
+import org.ta4j.core.Strategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -66,12 +68,14 @@ public class StrategyService {
         return dto;
     }
 
-    public Rule translateStrategy(Long strategyId, BarSeries series) {
+    public Strategy translateStrategy(Long strategyId, BarSeries series) {
         StrategyEntity entity = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new IllegalArgumentException("Strategy not found: " + strategyId));
         try {
             TradingStrategy tradingStrategy = objectMapper.readValue(entity.getRulesJson(), TradingStrategy.class);
-            return ruleParser.parse(tradingStrategy, series);
+            Rule entryRule = ruleParser.parseBuy(tradingStrategy, series);
+            Rule exitRule = ruleParser.parseSell(tradingStrategy, series);
+            return new BaseStrategy(tradingStrategy.getName(), entryRule, exitRule);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse strategy JSON", e);
         }
