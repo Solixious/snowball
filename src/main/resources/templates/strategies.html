@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Strategies</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<h1>Custom Strategies</h1>
+
+<div>
+    <h2>Add / Edit Strategy</h2>
+    <form id="strategyForm" th:action="@{/strategies}" method="post">
+        <input type="hidden" name="id" th:value="${strategy.id}" />
+        <label>Name: <input type="text" name="name" th:value="${strategy.name}" required /></label><br/>
+        <label>Description: <input type="text" name="description" th:value="${strategy.description}" /></label><br/>
+        <label>Strategy JSON:</label><br/>
+        <textarea name="rulesJson" rows="10" cols="60" th:text="${strategy.rulesJson}"></textarea><br/>
+        <button type="submit">Save</button>
+    </form>
+</div>
+
+<hr/>
+
+<div>
+    <h2>Existing Strategies</h2>
+    <table border="1">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${strategies}">
+            <td th:text="${s.name}"></td>
+            <td th:text="${s.description}"></td>
+            <td>
+                <form th:action="@{/strategies/edit}" method="get" style="display:inline;">
+                    <input type="hidden" name="id" th:value="${s.id}" />
+                    <button type="submit">Edit</button>
+                </form>
+                <form th:action="@{/strategies/delete}" method="post" style="display:inline;">
+                    <input type="hidden" name="id" th:value="${s.id}" />
+                    <button type="submit" onclick="return confirm('Delete this strategy?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
+
