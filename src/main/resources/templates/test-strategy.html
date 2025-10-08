@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Strategy</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<h1>Test Strategy</h1>
+
+<form th:action="@{/test-strategy}" method="post">
+    <label>Select Strategy:</label>
+    <select name="strategyId" required>
+        <option th:each="s : ${strategies}" th:value="${s.id}" th:text="${s.name}"></option>
+    </select>
+    <button type="submit">Backtest</button>
+</form>
+
+<div th:if="${report}">
+    <h2>Backtest Report</h2>
+    <pre th:text="${report}"></pre>
+</div>
+
+</body>
+</html>
+

@@ -2,10 +2,9 @@ package dev.indian.snowball.util;
 
 import dev.indian.snowball.model.kite.HistoricalData;
 import lombok.experimental.UtilityClass;
-import org.ta4j.core.Bar;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.BaseBarSeries;
-import org.ta4j.core.BaseBarSeriesBuilder;
+import org.ta4j.core.*;
+import org.ta4j.core.num.DecimalNum;
+import org.ta4j.core.num.DoubleNum;
 
 import java.time.Duration;
 import java.util.List;
@@ -29,14 +28,14 @@ public class BarSeriesUtil {
     }
 
     private Bar toBar(BaseBarSeries series, HistoricalData data) {
-        return series.barBuilder()
+        return BaseBar.builder()
                 .timePeriod(Duration.ofDays(1))
-                .openPrice(data.getOpen())
-                .highPrice(data.getHigh())
-                .lowPrice(data.getLow())
-                .closePrice(data.getClose())
-                .volume(data.getVolume())
-                .endTime(DateUtil.getInstant(data.getTimeStamp()))
+                .openPrice(DoubleNum.valueOf(data.getOpen()))
+                .highPrice(DoubleNum.valueOf(data.getHigh()))
+                .lowPrice(DoubleNum.valueOf(data.getLow()))
+                .closePrice(DoubleNum.valueOf(data.getClose()))
+                .volume(DecimalNum.valueOf(data.getVolume()))
+                .endTime(DateUtil.getZonedDateTime(data.getTimeStamp()))
                 .build();
     }
 }
