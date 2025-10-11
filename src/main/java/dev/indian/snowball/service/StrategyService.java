@@ -1,19 +1,19 @@
 package dev.indian.snowball.service;
 
-import dev.indian.snowball.model.entity.StrategyEntity;
-import dev.indian.snowball.model.dto.StrategyDTO;
-import dev.indian.snowball.model.dto.StrategyCreateDTO;
-import dev.indian.snowball.model.dto.StrategyUpdateDTO;
-import dev.indian.snowball.repository.StrategyRepository;
-import dev.indian.snowball.model.strategy.TradingStrategy;
-import dev.indian.snowball.rule.TradingStrategyRuleParser;
-import org.ta4j.core.Rule;
-import org.ta4j.core.BarSeries;
-import org.ta4j.core.BaseStrategy;
-import org.ta4j.core.Strategy;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.indian.snowball.model.dto.StrategyCreateDTO;
+import dev.indian.snowball.model.dto.StrategyDTO;
+import dev.indian.snowball.model.dto.StrategyUpdateDTO;
+import dev.indian.snowball.model.entity.StrategyEntity;
+import dev.indian.snowball.model.strategy.TradingStrategy;
+import dev.indian.snowball.repository.StrategyRepository;
+import dev.indian.snowball.rule.TradingStrategyRuleParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.ta4j.core.BarSeries;
+import org.ta4j.core.BaseStrategy;
+import org.ta4j.core.Rule;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -68,7 +68,7 @@ public class StrategyService {
         return dto;
     }
 
-    public Strategy translateStrategy(Long strategyId, BarSeries series) {
+    public BaseStrategy translateStrategy(Long strategyId, BarSeries series) {
         StrategyEntity entity = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new IllegalArgumentException("Strategy not found: " + strategyId));
         try {
