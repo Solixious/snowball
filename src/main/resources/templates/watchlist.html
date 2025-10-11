@@ -3,47 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <title>Watchlist</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
     <style>
-        .search-results { border: 1px solid #ccc; max-height: 200px; overflow-y: auto; position: absolute; background: #fff; width: 300px; }
+        .search-results { border: 1px solid var(--color-border); max-height: 200px; overflow-y: auto; position: absolute; background: var(--color-surface); width: 300px; z-index: 10; }
         .search-result-item { padding: 5px; cursor: pointer; }
-        .search-result-item:hover { background: #f0f0f0; }
+        .search-result-item:hover { background: var(--color-highlight); }
     </style>
 </head>
 <body>
-<h1>Watchlist</h1>
-
-<div style="position:relative; width:300px;">
-    <input type="text" id="instrument-search" placeholder="Search instrument name..." autocomplete="off" style="width:100%;" />
-    <div id="search-results" class="search-results" style="display:none;"></div>
+<link th:replace="~{fragments/header}"/>
+<div class="container">
+    <div class="card">
+        <h2>Watchlist</h2>
+        <div style="position:relative; width:300px;">
+            <input type="text" id="instrument-search" placeholder="Search instrument name..." autocomplete="off" style="width:100%;" />
+            <div id="search-results" class="search-results" style="display:none;"></div>
+        </div>
+        <form id="add-form" th:action="@{/watchlist/add}" method="post" style="margin-top:10px;">
+            <input type="hidden" id="instrument-token" name="instrumentToken" />
+        </form>
+        <table class="table" style="margin-top:30px;">
+            <thead>
+            <tr>
+                <th>Stock Name</th>
+                <th>Trading Symbol</th>
+                <th>Added At</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="stock : ${watchlist}">
+                <td th:text="${stock.name}"></td>
+                <td th:text="${stock.tradingSymbol}"></td>
+                <td th:text="${#temporals.format(stock.addedAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td>
+                    <form th:action="@{/watchlist/remove}" method="post" style="display:inline;">
+                        <input type="hidden" name="id" th:value="${stock.id}" />
+                        <button type="submit" class="badge loss" style="border:none;">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${watchlist == null or #lists.isEmpty(watchlist)}" class="badge neutral">No stocks in watchlist.</p>
+    </div>
 </div>
-
-<form id="add-form" th:action="@{/watchlist/add}" method="post" style="margin-top:10px;">
-    <input type="hidden" id="instrument-token" name="instrumentToken" />
-</form>
-
-<table style="margin-top:30px;">
-    <thead>
-    <tr>
-        <th>Stock Name</th>
-        <th>Trading Symbol</th>
-        <th>Added At</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="stock : ${watchlist}">
-        <td th:text="${stock.name}"></td>
-        <td th:text="${stock.tradingSymbol}"></td>
-        <td th:text="${#temporals.format(stock.addedAt, 'yyyy-MM-dd HH:mm')}"></td>
-        <td>
-            <form th:action="@{/watchlist/remove}" method="post" style="display:inline;">
-                <input type="hidden" name="id" th:value="${stock.id}" />
-                <button type="submit">Remove</button>
-            </form>
-        </td>
-    </tr>
-    </tbody>
-</table>
 
 <script>
     const searchBox = document.getElementById('instrument-search');

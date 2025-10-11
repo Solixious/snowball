@@ -1,65 +1,50 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Project Snowball Dashboard</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2em; }
-        .dashboard-section { margin-bottom: 2em; }
-        .dashboard-section h2 { margin-bottom: 0.5em; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
-        .nav-links a { margin-right: 1em; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
 </head>
 <body>
-<h1>Project Snowball Dashboard</h1>
-
-<div class="dashboard-section">
-    <h2>Market Status</h2>
-    <p th:text="${marketOpen} ? 'Market is OPEN' : 'Market is CLOSED'" style="font-weight:bold;"></p>
-</div>
-
-<div class="dashboard-section">
-    <h2>Current Holdings</h2>
-    <table>
-        <thead>
-            <tr><th>Symbol</th><th>Quantity</th><th>Avg. Price</th><th>Current Price</th></tr>
-        </thead>
-        <tbody>
-            <tr th:each="holding : ${holdings}">
-                <td th:text="${holding.symbol}"></td>
-                <td th:text="${holding.quantity}"></td>
-                <td th:text="${holding.avgPrice}"></td>
-                <td th:text="${holding.currentPrice}"></td>
-            </tr>
-        </tbody>
-    </table>
-    <p th:if="${holdings == null or #lists.isEmpty(holdings)}">No holdings found.</p>
-</div>
-
-<div class="dashboard-section">
-    <h2>Active Orders</h2>
-    <table>
-        <thead>
-            <tr><th>Order ID</th><th>Symbol</th><th>Type</th><th>Quantity</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-            <tr th:each="order : ${activeOrders}">
-                <td th:text="${order.id}"></td>
-                <td th:text="${order.symbol}"></td>
-                <td th:text="${order.type}"></td>
-                <td th:text="${order.quantity}"></td>
-                <td th:text="${order.status}"></td>
-            </tr>
-        </tbody>
-    </table>
-    <p th:if="${activeOrders == null or #lists.isEmpty(activeOrders)}">No active orders.</p>
-</div>
-
-<div class="dashboard-section nav-links">
-    <h2>Navigation</h2>
-    <a th:href="@{/strategies}">Manage Strategies</a>
-    <a th:href="@{/test-strategy}">Backtest Strategies</a>
-    <!-- Add more links as needed -->
+<link th:replace="~{fragments/header}"/>
+<div class="container">
+    <div class="card">
+        <h2>Market Status</h2>
+        <span th:classappend="${marketOpen} ? 'badge profit' : 'badge loss'" th:text="${marketOpen} ? 'Market is OPEN' : 'Market is CLOSED'"></span>
+    </div>
+    <div class="card">
+        <h2>Current Holdings</h2>
+        <table class="table">
+            <thead>
+                <tr><th>Symbol</th><th>Quantity</th><th>Avg. Price</th><th>Current Price</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="holding : ${holdings}">
+                    <td th:text="${holding.symbol}"></td>
+                    <td th:text="${holding.quantity}"></td>
+                    <td th:text="${holding.avgPrice}"></td>
+                    <td th:text="${holding.currentPrice}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <p th:if="${holdings == null or #lists.isEmpty(holdings)}" class="badge neutral">No holdings found.</p>
+    </div>
+    <div class="card">
+        <h2>Active Orders</h2>
+        <table class="table">
+            <thead>
+                <tr><th>Order ID</th><th>Symbol</th><th>Type</th><th>Quantity</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${activeOrders}">
+                    <td th:text="${order.id}"></td>
+                    <td th:text="${order.symbol}"></td>
+                    <td th:text="${order.type}"></td>
+                    <td th:text="${order.quantity}"></td>
+                    <td th:text="${order.status}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <p th:if="${activeOrders == null or #lists.isEmpty(activeOrders)}" class="badge neutral">No active orders.</p>
+    </div>
 </div>
 
 </body>

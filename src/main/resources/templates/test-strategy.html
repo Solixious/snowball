@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>Test Strategy</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/global.css}" />
 </head>
 <body>
-<h1>Test Strategy</h1>
-
-<form th:action="@{/test-strategy}" method="post">
-    <label>Select Strategy:</label>
-    <select name="strategyId" required>
-        <option th:each="s : ${strategies}" th:value="${s.id}" th:text="${s.name}"></option>
-    </select>
-    <button type="submit">Backtest</button>
-</form>
-
-<div th:if="${report}">
-    <h2>Backtest Report</h2>
-    <pre th:text="${report}"></pre>
+<link th:replace="~{fragments/header}"/>
+<div class="container">
+    <div class="card">
+        <h2>Test Strategy</h2>
+        <form th:action="@{/test-strategy}" method="post" style="margin-bottom:1.5rem;">
+            <label for="strategyId">Select Strategy:</label>
+            <select name="strategyId" id="strategyId" required style="margin:0 1rem;">
+                <option th:each="s : ${strategies}" th:value="${s.id}" th:text="${s.name}"></option>
+            </select>
+            <button type="submit">Backtest</button>
+        </form>
+        <div th:if="${report}" class="card highlighted">
+            <h3>Backtest Report</h3>
+            <pre th:text="${report}" style="background:var(--color-bg); padding:1em; border-radius:6px;"></pre>
+        </div>
+    </div>
 </div>
-
 </body>
 </html>
-
