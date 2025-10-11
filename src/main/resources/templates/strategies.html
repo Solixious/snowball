@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     <title>Manage Strategies</title>
     <link rel="stylesheet" th:href="@{/css/global.css}" />
+    <style>
+        .input, input[type="text"], textarea {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+            color: var(--color-text-primary);
+            margin-bottom: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        label { display: block; margin-bottom: 0.5rem; }
+    </style>
 </head>
 <body>
 <link th:replace="~{fragments/header}"/>
@@ -12,10 +30,31 @@
         <h2>Add / Edit Strategy</h2>
         <form id="strategyForm" th:action="@{/strategies}" method="post">
             <input type="hidden" name="id" th:value="${strategy.id}" />
-            <label>Name: <input type="text" name="name" th:value="${strategy.name}" required /></label><br/>
-            <label>Description: <input type="text" name="description" th:value="${strategy.description}" /></label><br/>
-            <label>Strategy JSON:</label><br/>
-            <textarea name="rulesJson" rows="10" cols="60" th:text="${strategy.rulesJson}" style="width:100%;"></textarea><br/>
+            <label>Name:
+                <input type="text" name="name" th:value="${strategy.name}" required class="input" />
+            </label>
+            <label>Description:
+                <input type="text" name="description" th:value="${strategy.description}" class="input" />
+            </label>
+            <label>Strategy JSON:</label>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <textarea name="rulesJson" id="rulesJson" th:text="${strategy.rulesJson}" class="input" style="flex:1;"></textarea>
+                <button type="button" id="prettifyJsonBtn" class="secondary" style="height:2.5rem;">Prettify</button>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var prettifyBtn = document.getElementById('prettifyJsonBtn');
+                    var textarea = document.getElementById('rulesJson');
+                    prettifyBtn.addEventListener('click', function() {
+                        try {
+                            var json = JSON.parse(textarea.value);
+                            textarea.value = JSON.stringify(json, null, 4);
+                        } catch (e) {
+                            alert('Invalid JSON!');
+                        }
+                    });
+                });
+            </script>
             <button type="submit">Save</button>
         </form>
     </div>
