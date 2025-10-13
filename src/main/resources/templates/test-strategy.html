@@ -10,11 +10,28 @@
 <div class="container">
     <div class="card">
         <h2>Test Strategy</h2>
-        <form th:action="@{/test-strategy}" method="post" style="margin-bottom:1.5rem;">
+        <form th:action="@{/test-strategy}" method="post" style="margin-bottom:1.5rem; display:flex; flex-wrap:wrap; gap:1rem; align-items:center;">
             <label for="strategyId">Select Strategy:</label>
             <select name="strategyId" id="strategyId" required style="margin:0 1rem;">
-                <option th:each="s : ${strategies}" th:value="${s.id}" th:text="${s.name}"></option>
+                <option th:each="s : ${strategies}" th:value="${s.id}" th:text="${s.name}" th:selected="${selectedStrategyId} == ${s.id}"></option>
             </select>
+
+            <label for="instrumentToken">Instrument:</label>
+            <select name="instrumentToken" id="instrumentToken" required style="margin:0 1rem; min-width:18rem;">
+                <option value="" disabled th:if="${#lists.isEmpty(watchlist)}" selected>No watchlist instruments</option>
+                <option th:each="w : ${watchlist}"
+                        th:value="${w.instrumentToken}"
+                        th:text="${w.tradingSymbol} + ' - ' + ${w.name}"
+                        th:selected="${selectedInstrumentToken} == ${w.instrumentToken}">
+                </option>
+            </select>
+
+            <label for="fromDate">From:</label>
+            <input type="date" id="fromDate" name="fromDate" required th:value="${fromDate}">
+
+            <label for="toDate">To:</label>
+            <input type="date" id="toDate" name="toDate" required th:value="${toDate}">
+
             <button type="submit">Backtest</button>
         </form>
         <div th:if="${report}" class="card highlighted">

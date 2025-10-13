@@ -9,7 +9,6 @@ import lombok.experimental.UtilityClass;
 import org.ta4j.core.*;
 import org.ta4j.core.backtest.BarSeriesManager;
 import org.ta4j.core.num.DecimalNum;
-import org.ta4j.core.num.DoubleNum;
 
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
@@ -37,10 +36,10 @@ public class TA4JUtils {
     private Bar toBar(BaseBarSeries series, HistoricalData data) {
         return BaseBar.builder()
                 .timePeriod(Duration.ofDays(1))
-                .openPrice(DoubleNum.valueOf(data.getOpen()))
-                .highPrice(DoubleNum.valueOf(data.getHigh()))
-                .lowPrice(DoubleNum.valueOf(data.getLow()))
-                .closePrice(DoubleNum.valueOf(data.getClose()))
+                .openPrice(DecimalNum.valueOf(data.getOpen()))
+                .highPrice(DecimalNum.valueOf(data.getHigh()))
+                .lowPrice(DecimalNum.valueOf(data.getLow()))
+                .closePrice(DecimalNum.valueOf(data.getClose()))
                 .volume(DecimalNum.valueOf(data.getVolume()))
                 .endTime(DateUtil.getZonedDateTime(data.getTimeStamp()))
                 .build();

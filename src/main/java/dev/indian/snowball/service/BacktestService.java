@@ -9,6 +9,7 @@ import dev.indian.snowball.model.kite.Instrument;
 import dev.indian.snowball.model.strategy.TradingStrategy;
 import dev.indian.snowball.rule.TradingStrategyRuleParser;
 import dev.indian.snowball.util.TA4JUtils;
+import dev.indian.snowball.repository.WatchlistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class BacktestService {
     private final TradingStrategyRuleParser ruleParser;
     private final KiteService kiteService;
     private final ObjectMapper objectMapper;
+    private final WatchlistRepository watchlistRepository;
 
     public static final double DEFAULT_INITIAL_CAPITAL = 100000.0;
     public static final double DEFAULT_PER_TRADE_PCT = 0.1;
@@ -41,15 +43,23 @@ public class BacktestService {
             return "Strategy not found.";
         }
         StrategyDTO strategyDTO = strategyOpt.get();
-        // 2. Parse rulesJson
-        TradingStrategy tradingStrategy;
+        // 2 Parse dates
+        LocalDate fromDate;
+        LocalDate toDate;
         try {
-            tradingStrategy = objectMapper.readValue(strategyDTO.getRulesJson(), TradingStrategy.class);
+            fromDate = LocalDate.parse(fromDateStr);
+            toDate = LocalDate.parse(toDateStr);
         } catch (Exception e) {
-            return "Error parsing strategy rules: " + e.getMessage();
+            return "Invalid date format. Use YYYY-MM-DD.";
         }
-        // 3. Load historical data (stubbed)
-        List<dev.indian.snowball.model.kite.HistoricalData> historicalData = loadHistoricalDataStub();
+        if (toDate.isBefore(fromDate)) {
+            return "'toDate' cannot be before 'fromDate'.";
+        }
+        if (instrumentToken == null || instrumentToken.isBlank()) {
+            return "Instrument token is required.";
+        }
+        // 3. Load historical data (validated against watchlist)
+        List<dev.indian.snowball.model.kite.HistoricalData> historicalData = loadHistoricalDataStub(instrumentToken, fromDate, toDate);
         if (historicalData.isEmpty()) {
             return "No historical data available.";
         }
@@ -57,6 +67,9 @@ public class BacktestService {
         BarSeries series = TA4JUtils.createBarSeries(strategyDTO.getName(), historicalData);
         // 5. Parse buy/sell rules
         Strategy ta4jStrategy = getBaseStrategy(strategyId, series);
+        if (ta4jStrategy == null) {
+            return "Failed to build TA4J strategy.";
+        }
         // 6. Manually simulate trades
         BarSeriesManager manager = new BarSeriesManager(series);
         TradingRecord tradingRecord = manager.run(ta4jStrategy);
@@ -307,9 +320,29 @@ public class BacktestService {
     }
 
     // Stub for loading historical data
-    private List<dev.indian.snowball.model.kite.HistoricalData> loadHistoricalDataStub() {
-        // Load historical data of watchlist instruments from KiteService
-        return List.of();
+    private List<dev.indian.snowball.model.kite.HistoricalData> loadHistoricalDataStub(String instrumentToken, LocalDate fromDate, LocalDate toDate) {
+        // Validate instrument token exists in watchlist
+        if (watchlistRepository.findByInstrumentToken(instrumentToken).isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            dev.indian.snowball.model.kite.HistoricalData hd = kiteService.getHistoricalData(
+                    fromDate.atStartOfDay(Zone.INDIA).toLocalDateTime(),
+                    toDate.plusDays(1).atStartOfDay(Zone.INDIA).toLocalDateTime(),
+                    instrumentToken,
+                    "day",
+                    false,
+                    false
+            );
+            if (hd == null || hd.getDataArrayList() == null) {
+                return Collections.emptyList();
+            }
+            List<dev.indian.snowball.model.kite.HistoricalData> list = hd.getDataArrayList();
+            // Filter invalid prices
+            return list.stream().filter(this::isValidPrice).toList();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     private BacktestReport getEmptyReport(double initialCapital) {
