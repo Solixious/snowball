@@ -30,7 +30,7 @@ public class TestStrategyController {
     public String backtestStrategy(@RequestParam("strategyId") Long strategyId, Model model) {
         List<StrategyDTO> strategies = strategyService.getAllStrategies();
         model.addAttribute("strategies", strategies);
-        String report = backtestService.runBacktest(strategyId);
+        String report = backtestService.runBacktest(strategyId, "", "", "");
         model.addAttribute("report", report);
         return "test-strategy";
     }

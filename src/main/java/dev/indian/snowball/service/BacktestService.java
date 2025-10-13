@@ -9,6 +9,7 @@ import dev.indian.snowball.model.kite.Instrument;
 import dev.indian.snowball.model.strategy.TradingStrategy;
 import dev.indian.snowball.rule.TradingStrategyRuleParser;
 import dev.indian.snowball.util.TA4JUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.ta4j.core.*;
@@ -20,23 +21,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BacktestService {
-    @Autowired
-    private StrategyService strategyService;
-    @Autowired
-    private TradingStrategyRuleParser ruleParser;
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final StrategyService strategyService;
+    private final TradingStrategyRuleParser ruleParser;
+    private final KiteService kiteService;
+    private final ObjectMapper objectMapper;
 
     public static final double DEFAULT_INITIAL_CAPITAL = 100000.0;
     public static final double DEFAULT_PER_TRADE_PCT = 0.1;
     public static final double MAX_PRICE = 1000000.0;
     public static final double MIN_PRICE = 0.01;
-    @Autowired
-    private KiteService kiteService;
 
     // Dummy Method, to be completed
-    public String runBacktest(Long strategyId) {
+    public String runBacktest(Long strategyId, String instrumentToken, String fromDateStr, String toDateStr) {
         // 1. Fetch strategy using StrategyService
         var strategyOpt = strategyService.getStrategyById(strategyId);
         if (strategyOpt.isEmpty()) {
@@ -310,7 +308,7 @@ public class BacktestService {
 
     // Stub for loading historical data
     private List<dev.indian.snowball.model.kite.HistoricalData> loadHistoricalDataStub() {
-        // TODO: Replace with actual historical data loading logic
+        // Load historical data of watchlist instruments from KiteService
         return List.of();
     }
 
