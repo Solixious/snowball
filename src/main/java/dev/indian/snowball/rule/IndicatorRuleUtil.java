@@ -21,4 +21,13 @@ public class IndicatorRuleUtil {
             default -> throw new UnsupportedOperationException("Unknown operator: " + operator);
         };
     }
+
+    // New overload: compare one indicator to another indicator
+    public Rule buildRule(Indicator<Num> left, String operator, Indicator<Num> right) {
+        return switch (operator) {
+            case "<" -> new UnderIndicatorRule(left, right);
+            case ">" -> new OverIndicatorRule(left, right);
+            default -> throw new UnsupportedOperationException("Unknown operator: " + operator);
+        };
+    }
 }
