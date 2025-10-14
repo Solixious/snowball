@@ -1,14 +1,14 @@
 package dev.indian.snowball.rule;
 
 import lombok.experimental.UtilityClass;
-import org.ta4j.core.Rule;
 import org.ta4j.core.Indicator;
+import org.ta4j.core.Rule;
 import org.ta4j.core.num.Num;
 import org.ta4j.core.rules.OverIndicatorRule;
 import org.ta4j.core.rules.UnderIndicatorRule;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 @UtilityClass
 public class IndicatorRuleUtil {

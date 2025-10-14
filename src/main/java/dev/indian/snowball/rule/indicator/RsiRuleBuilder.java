@@ -1,19 +1,15 @@
 package dev.indian.snowball.rule.indicator;
 
-import dev.indian.snowball.rule.IndicatorRuleUtil;
-import dev.indian.snowball.rule.RuleBuilder;
-import dev.indian.snowball.rule.RuleParameter;
-import dev.indian.snowball.rule.RuleParamUtil;
-import dev.indian.snowball.rule.RuleParamKeys;
+import dev.indian.snowball.rule.*;
 import org.springframework.stereotype.Component;
 import org.ta4j.core.BarSeries;
 import org.ta4j.core.Rule;
 import org.ta4j.core.indicators.RSIIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
 
-import java.util.Map;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Component("RSI")
 public class RsiRuleBuilder implements RuleBuilder {

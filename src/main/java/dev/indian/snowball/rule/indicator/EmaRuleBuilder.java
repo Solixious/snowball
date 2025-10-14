@@ -1,18 +1,15 @@
 package dev.indian.snowball.rule.indicator;
 
-import dev.indian.snowball.rule.RuleBuilder;
-import org.ta4j.core.Rule;
+import dev.indian.snowball.rule.*;
+import org.springframework.stereotype.Component;
 import org.ta4j.core.BarSeries;
+import org.ta4j.core.Rule;
 import org.ta4j.core.indicators.EMAIndicator;
 import org.ta4j.core.indicators.helpers.ClosePriceIndicator;
-import dev.indian.snowball.rule.IndicatorRuleUtil;
-import dev.indian.snowball.rule.RuleParameter;
-import dev.indian.snowball.rule.RuleParamUtil;
-import dev.indian.snowball.rule.RuleParamKeys;
-import java.util.Map;
-import java.util.List;
+
 import java.util.Arrays;
-import org.springframework.stereotype.Component;
+import java.util.List;
+import java.util.Map;
 
 @Component("EMA")
 public class EmaRuleBuilder implements RuleBuilder {

@@ -5,6 +5,7 @@ import dev.indian.snowball.model.entity.AppConfigEntity;
 import dev.indian.snowball.repository.AppConfigRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 @Service
