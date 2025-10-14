@@ -275,4 +275,8 @@ public class KiteService {
         }
         return java.sql.Timestamp.valueOf(localDateTime);
     }
+
+    public Instrument getInstrumentByToken(String token) {
+        return instrumentCacheService.getInstrumentByToken(Long.parseLong(token)).orElseThrow();
+    }
 }

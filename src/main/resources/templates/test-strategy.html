@@ -34,9 +34,154 @@
 
             <button type="submit">Backtest</button>
         </form>
+
         <div th:if="${report}" class="card highlighted">
-            <h3>Backtest Report</h3>
-            <pre th:text="${report}" style="background:var(--color-bg); padding:1em; border-radius:6px;"></pre>
+            <h3 th:text="'Backtest Report — ' + ${report.strategyName}">Backtest Report</h3>
+            <p style="margin-top:-0.5rem; color: var(--color-text-secondary);">
+                <span th:text="'Instrument: ' + ${selectedInstrumentToken}"></span>
+                <span> • </span>
+                <span th:text="'Range: ' + ${fromDate} + ' → ' + ${toDate}"></span>
+            </p>
+
+            <!-- Summary metrics -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:0.75rem; margin: 1rem 0;">
+                <div class="card" style="margin:0;">
+                    <strong>Starting Capital</strong>
+                    <div th:text="${#numbers.formatDecimal(report.startingCapital, 1, 2)}"></div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <strong>Ending Capital</strong>
+                    <div th:text="${#numbers.formatDecimal(report.endingCapital, 1, 2)}"></div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <strong>Net Profit</strong>
+                    <div th:text="${#numbers.formatDecimal(report.netProfit, 1, 2)}"></div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <strong>Net Return</strong>
+                    <div th:text="${#numbers.formatDecimal(report.netReturnPct, 1, 2)} + '%' "></div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <strong>Total Trades</strong>
+                    <div th:text="${report.totalTrades}"></div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <strong>Win Rate</strong>
+                    <div th:text="${#numbers.formatDecimal(report.winRatePct, 1, 2)} + '%' "></div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <strong>Avg Profit / Trade</strong>
+                    <div th:text="${#numbers.formatDecimal(report.avgProfitPerTrade, 1, 2)}"></div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <strong>Max Drawdown</strong>
+                    <div th:text="${#numbers.formatDecimal(report.maxDrawdownPct, 1, 2)} + '%' "></div>
+                </div>
+                <div class="card" style="margin:0;">
+                    <strong>CAGR</strong>
+                    <div th:text="${#numbers.formatDecimal(report.cagrPct, 1, 2)} + '%' "></div>
+                </div>
+            </div>
+
+            <!-- Equity Curve -->
+            <div class="card" style="margin:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong>Equity Curve</strong>
+                    <small th:if="${#lists.size(report.equityCurve)} > 0" th:text="${#lists.size(report.equityCurve)} + ' points'"></small>
+                </div>
+                <canvas id="equityCanvas" width="1000" height="260" style="max-width:100%; height:auto; margin-top:0.5rem; border:1px solid var(--color-border);"></canvas>
+                <script th:inline="javascript">
+                /*<![CDATA[*/
+                (function(){
+                    var canvas = document.getElementById('equityCanvas');
+                    if (!canvas) return;
+                    var ctx = canvas.getContext('2d');
+                    var equities = /*[[${report.equityCurve}]]*/ null;
+                    // Project to numbers only if available
+                    var values = /*[[${report.equityCurve != null}]]*/ false ? /*[[${report.equityCurve.![equity]}]]*/ [] : [];
+                    var dates = /*[[${report.equityCurve != null}]]*/ false ? /*[[${report.equityCurve.![date]}]]*/ [] : [];
+                    if (!values || values.length < 2) {
+                        ctx.font = '14px sans-serif';
+                        ctx.fillStyle = '#666';
+                        ctx.fillText('Not enough data to draw equity curve', 12, 24);
+                        return;
+                    }
+                    var W = canvas.width, H = canvas.height, PAD = 24;
+                    var min = Math.min.apply(null, values);
+                    var max = Math.max.apply(null, values);
+                    if (max === min) { max = min + 1; }
+                    // axes
+                    ctx.clearRect(0,0,W,H);
+                    ctx.strokeStyle = '#d0d7e0';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(PAD, PAD);
+                    ctx.lineTo(PAD, H-PAD);
+                    ctx.lineTo(W-PAD, H-PAD);
+                    ctx.stroke();
+                    // labels
+                    ctx.fillStyle = '#4b5563';
+                    ctx.font = '12px sans-serif';
+                    ctx.fillText(max.toFixed(2), 4, PAD+4);
+                    ctx.fillText(min.toFixed(2), 4, H-PAD-4);
+                    // line
+                    ctx.strokeStyle = '#4BA3C7';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    var n = values.length;
+                    for (var i=0;i<n;i++){
+                        var x = PAD + (i * (W - 2*PAD) / (n-1));
+                        var y = H - PAD - ((values[i]-min) * (H-2*PAD) / (max-min));
+                        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                    }
+                    ctx.stroke();
+                })();
+                /*]]>*/
+                </script>
+            </div>
+
+            <!-- Trades Table -->
+            <div class="card" style="margin-top:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong>Trades</strong>
+                    <small th:text="${report.totalTrades} + ' total'">0 total</small>
+                </div>
+                <table class="table" th:if="${report.trades} != null and !${#lists.isEmpty(report.trades)}">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Instrument</th>
+                            <th>Entry Date</th>
+                            <th>Exit Date</th>
+                            <th>Qty</th>
+                            <th>Entry</th>
+                            <th>Exit</th>
+                            <th>Profit</th>
+                            <th>Return</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="t, iter : ${report.trades}">
+                            <td th:text="${iter.index + 1}">1</td>
+                            <td>
+                                <div th:text="${t.instrumentName} ?: ${t.instrumentToken}"></div>
+                                <small style="color:var(--color-text-secondary);" th:if="${t.instrumentName}" th:text="${t.instrumentToken}"></small>
+                            </td>
+                            <td th:text="${t.entryDate}"></td>
+                            <td th:text="${t.exitDate}"></td>
+                            <td th:text="${t.quantity}"></td>
+                            <td th:text="${#numbers.formatDecimal(t.entryPrice, 1, 2)}"></td>
+                            <td th:text="${#numbers.formatDecimal(t.exitPrice, 1, 2)}"></td>
+                            <td>
+                                <span class="badge" th:classappend="${t.profit} >= 0 ? ' profit' : ' loss'"
+                                      th:text="${#numbers.formatDecimal(t.profit, 1, 2)}"></span>
+                            </td>
+                            <td th:text="${#numbers.formatDecimal(t.returnPct, 1, 2)} + '%' "></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="alert-danger" th:if="${report.trades} == null or ${#lists.isEmpty(report.trades)}">No trades in the selected period.</div>
+            </div>
         </div>
     </div>
 </div>

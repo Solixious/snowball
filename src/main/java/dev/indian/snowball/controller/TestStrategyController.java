@@ -1,5 +1,6 @@
 package dev.indian.snowball.controller;
 
+import dev.indian.snowball.model.backtest.BacktestReport;
 import dev.indian.snowball.model.dto.StrategyDTO;
 import dev.indian.snowball.model.dto.WatchlistDisplayDTO;
 import dev.indian.snowball.service.BacktestService;
@@ -50,7 +51,7 @@ public class TestStrategyController {
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
 
-        String report = backtestService.runBacktest(strategyId, instrumentToken, fromDate, toDate);
+        BacktestReport report = backtestService.runBacktest(strategyId, List.of(instrumentToken), LocalDate.parse(fromDate), LocalDate.parse(toDate), 0d, 0d);
         model.addAttribute("report", report);
         return "test-strategy";
     }

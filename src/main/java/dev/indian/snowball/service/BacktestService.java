@@ -86,11 +86,13 @@ public class BacktestService {
      * Returns a detailed BacktestReport with trades, equity curve, and performance metrics.
      */
     public BacktestReport runBacktest(Long strategyId,
-                                      List<Instrument> instruments,
+                                      List<String> instrumentTokens,
                                       LocalDate fromDate,
                                       LocalDate toDate,
                                       Double initialCapitalOpt,
                                       Double perTradeCapitalPctOpt) {
+        List<Instrument> instruments = instrumentTokens.stream().map(kiteService::getInstrumentByToken)
+                .filter(Objects::nonNull).toList();
         double initialCapital = (initialCapitalOpt == null || initialCapitalOpt <= 0) ? DEFAULT_INITIAL_CAPITAL : initialCapitalOpt;
         double perTradePct = (perTradeCapitalPctOpt == null || perTradeCapitalPctOpt <= 0) ? DEFAULT_PER_TRADE_PCT : perTradeCapitalPctOpt;
         if (perTradePct > 1.0) {
