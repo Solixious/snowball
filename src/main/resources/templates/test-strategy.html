@@ -10,17 +10,33 @@
 <div class="container">
     <div class="card">
         <h2>Test Strategy</h2>
-        <form th:action="@{/test-strategy}" method="post" style="margin-bottom:1.5rem; display:flex; flex-wrap:wrap; gap:1rem; align-items:center;">
-            <label for="strategyId">Select Strategy:</label>
-            <select name="strategyId" id="strategyId" required style="margin:0 1rem;">
-                <option th:each="s : ${strategies}" th:value="${s.id}" th:text="${s.name}" th:selected="${selectedStrategyId} == ${s.id}"></option>
-            </select>
+        <form th:action="@{/test-strategy}" method="post" class="backtest-form">
+            <div class="form-group">
+                <label for="strategyId">Select Strategy</label>
+                <select name="strategyId" id="strategyId" required class="form-control">
+                    <option th:each="s : ${strategies}" th:value="${s.id}" th:text="${s.name}" th:selected="${selectedStrategyId} == ${s.id}"></option>
+                </select>
+            </div>
 
-            <label for="fromDate">From:</label>
-            <input type="date" id="fromDate" name="fromDate" required th:value="${fromDate}">
+            <div class="form-group">
+                <label for="fromDate">From</label>
+                <input type="date" id="fromDate" name="fromDate" required class="form-control" th:value="${fromDate}">
+            </div>
 
-            <label for="toDate">To:</label>
-            <input type="date" id="toDate" name="toDate" required th:value="${toDate}">
+            <div class="form-group">
+                <label for="toDate">To</label>
+                <input type="date" id="toDate" name="toDate" required class="form-control" th:value="${toDate}">
+            </div>
+
+            <div class="form-group">
+                <label for="initialCapital">Initial Capital</label>
+                <input type="number" id="initialCapital" name="initialCapital" min="0" step="100" class="form-control" th:value="${initialCapital}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="perTradeCapitalPct">Per-Trade Investment%</label>
+                <input type="number" id="perTradeCapitalPct" name="perTradeCapitalPct" min="0" step="0.1" class="form-control" th:value="${perTradeCapitalPct}" required>
+            </div>
 
             <button type="submit">Backtest</button>
         </form>
@@ -31,6 +47,10 @@
                 <span th:text="'Universe: Watchlist (' + ${watchlistSize} + ' instruments)'">Universe</span>
                 <span>•</span>
                 <span th:text="'Range: ' + ${fromDate} + ' → ' + ${toDate}"></span>
+                <span>•</span>
+                <span th:text="'Initial: ' + ${#numbers.formatDecimal(initialCapital, 1, 2)}"></span>
+                <span>•</span>
+                <span th:text="'Per-trade: ' + ${#numbers.formatDecimal(perTradeCapitalPct, 1, 2)} + '%' "></span>
             </p>
 
             <!-- Summary metrics -->

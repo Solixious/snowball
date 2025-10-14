@@ -33,6 +33,8 @@ public class TestStrategyController {
         // Defaults
         model.addAttribute("fromDate", LocalDate.now().minusMonths(6));
         model.addAttribute("toDate", LocalDate.now());
+        model.addAttribute("initialCapital", 100000);
+        model.addAttribute("perTradeCapitalPct", 10);
         return "test-strategy";
     }
 
@@ -40,6 +42,8 @@ public class TestStrategyController {
     public String backtestStrategy(@RequestParam("strategyId") Long strategyId,
                                    @RequestParam("fromDate") String fromDate,
                                    @RequestParam("toDate") String toDate,
+                                   @RequestParam("initialCapital") Double initialCapital,
+                                   @RequestParam("perTradeCapitalPct") Double perTradeCapitalPct,
                                    Model model) {
         List<StrategyDTO> strategies = strategyService.getAllStrategies();
         List<WatchlistDisplayDTO> watchlist = watchlistService.getAllDisplay();
@@ -49,14 +53,16 @@ public class TestStrategyController {
         model.addAttribute("selectedStrategyId", strategyId);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
+        model.addAttribute("initialCapital", initialCapital);
+        model.addAttribute("perTradeCapitalPct", perTradeCapitalPct);
 
         BacktestReport report = backtestService.runBacktest(
                 strategyId,
                 watchlist.stream().map(WatchlistDisplayDTO::getInstrumentToken).toList(),
                 LocalDate.parse(fromDate),
                 LocalDate.parse(toDate),
-                0d,
-                0d
+                initialCapital,
+                perTradeCapitalPct
         );
         model.addAttribute("report", report);
         return "test-strategy";

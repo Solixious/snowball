@@ -174,3 +174,112 @@ button:hover {
 .hidden { display: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Backtest form styles */
+.backtest-form {
+    gap: 0.75rem;
+}
+.backtest-form label {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    height: 2.4rem;
+    line-height: 1.2;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02) inset;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.form-control:hover {
+    border-color: #c2c9d3;
+}
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(75, 163, 199, 0.2);
+}
+/* Remove number input spinners in WebKit */
+.form-control[type=number]::-webkit-outer-spin-button,
+.form-control[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* Remove number input spinners in Firefox */
+.form-control[type=number] { -moz-appearance: textfield; }
+
+/* Make selects visually consistent */
+select.form-control {
+    background-image: linear-gradient(45deg, transparent 50%, #7a8696 50%),
+                      linear-gradient(135deg, #7a8696 50%, transparent 50%),
+                      linear-gradient(to bottom, var(--color-surface), var(--color-surface));
+    background-position: calc(100% - 16px) calc(1rem), calc(100% - 10px) calc(1rem), 100% 0;
+    background-size: 6px 6px, 6px 6px, 2.4rem 2.4rem;
+    background-repeat: no-repeat;
+    padding-right: 2rem;
+}
+
+/* Grouped sections in the backtest form */
+.form-section {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-surface);
+}
+.form-section legend {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    padding: 0 0.4rem;
+}
+.form-section label {
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+}
+
+/* Simple row grouping for the backtest form */
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%; /* force each row to occupy its own line within the flex form */
+}
+.form-row label {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+.form-row .form-control {
+    min-width: 10rem;
+}
+
+/* Vertical groups: place label above input and keep spacing consistent */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+    max-width: 28rem;
+}
+.form-group label { margin: 0; }
+.form-group .form-control { width: 100%; }
+
+@media (max-width: 900px) {
+    .form-section {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+    }
+    .form-section .form-control {
+        min-width: 10rem;
+    }
+    .form-row {
+        flex-wrap: wrap;
+    }
+}
