@@ -16,16 +16,6 @@
                 <option th:each="s : ${strategies}" th:value="${s.id}" th:text="${s.name}" th:selected="${selectedStrategyId} == ${s.id}"></option>
             </select>
 
-            <label for="instrumentToken">Instrument:</label>
-            <select name="instrumentToken" id="instrumentToken" required style="margin:0 1rem; min-width:18rem;">
-                <option value="" disabled th:if="${#lists.isEmpty(watchlist)}" selected>No watchlist instruments</option>
-                <option th:each="w : ${watchlist}"
-                        th:value="${w.instrumentToken}"
-                        th:text="${w.tradingSymbol} + ' - ' + ${w.name}"
-                        th:selected="${selectedInstrumentToken} == ${w.instrumentToken}">
-                </option>
-            </select>
-
             <label for="fromDate">From:</label>
             <input type="date" id="fromDate" name="fromDate" required th:value="${fromDate}">
 
@@ -37,9 +27,9 @@
 
         <div th:if="${report}" class="card highlighted">
             <h3 th:text="'Backtest Report — ' + ${report.strategyName}">Backtest Report</h3>
-            <p style="margin-top:-0.5rem; color: var(--color-text-secondary);">
-                <span th:text="'Instrument: ' + ${selectedInstrumentToken}"></span>
-                <span> • </span>
+            <p style="margin-top:-0.5rem; color: var(--color-text-secondary); display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <span th:text="'Universe: Watchlist (' + ${watchlistSize} + ' instruments)'">Universe</span>
+                <span>•</span>
                 <span th:text="'Range: ' + ${fromDate} + ' → ' + ${toDate}"></span>
             </p>
 
@@ -87,30 +77,47 @@
             <div class="card" style="margin:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <strong>Equity Curve</strong>
-                    <small th:if="${#lists.size(report.equityCurve)} > 0" th:text="${#lists.size(report.equityCurve)} + ' points'"></small>
+                    <small th:if="${report.equityCurve != null and !#lists.isEmpty(report.equityCurve)}"
+                           th:text="${#lists.size(report.equityCurve)} + ' points'"></small>
                 </div>
-                <canvas id="equityCanvas" width="1000" height="260" style="max-width:100%; height:auto; margin-top:0.5rem; border:1px solid var(--color-border);"></canvas>
-                <script th:inline="javascript">
-                /*<![CDATA[*/
+                <canvas id="equityCanvas" width="1000" height="260" style="max-width:100%; height:auto; margin-top:0.5rem; border:1px solid var(--color-border);"
+                        th:attr="data-values=${report.equityCurve != null and !#lists.isEmpty(report.equityCurve) ? #strings.listJoin(report.equityCurve.![equity], ',') : ''}, data-profits=${report.trades != null and !#lists.isEmpty(report.trades) ? #strings.listJoin(report.trades.![profit], ',') : ''}, data-starting=${report.startingCapital}"></canvas>
+                <script>
                 (function(){
                     var canvas = document.getElementById('equityCanvas');
                     if (!canvas) return;
                     var ctx = canvas.getContext('2d');
-                    var equities = /*[[${report.equityCurve}]]*/ null;
-                    // Project to numbers only if available
-                    var values = /*[[${report.equityCurve != null}]]*/ false ? /*[[${report.equityCurve.![equity]}]]*/ [] : [];
-                    var dates = /*[[${report.equityCurve != null}]]*/ false ? /*[[${report.equityCurve.![date]}]]*/ [] : [];
-                    if (!values || values.length < 2) {
+
+                    function parseNums(s){
+                        if (!s) return [];
+                        return s.split(',').map(function(x){ var n = parseFloat(x); return isNaN(n)?0:n; });
+                    }
+
+                    var eqValues = parseNums(canvas.dataset.values);
+                    if (eqValues.length < 2) {
+                        var start = parseFloat(canvas.dataset.starting || '0');
+                        var profits = parseNums(canvas.dataset.profits);
+                        if (profits.length > 0) {
+                            var cum = start;
+                            eqValues = [start];
+                            for (var i=0;i<profits.length;i++) {
+                                cum += profits[i];
+                                eqValues.push(cum);
+                            }
+                        }
+                    }
+
+                    if (!eqValues || eqValues.length < 2) {
                         ctx.font = '14px sans-serif';
                         ctx.fillStyle = '#666';
                         ctx.fillText('Not enough data to draw equity curve', 12, 24);
                         return;
                     }
+
                     var W = canvas.width, H = canvas.height, PAD = 24;
-                    var min = Math.min.apply(null, values);
-                    var max = Math.max.apply(null, values);
+                    var min = Math.min.apply(null, eqValues);
+                    var max = Math.max.apply(null, eqValues);
                     if (max === min) { max = min + 1; }
-                    // axes
                     ctx.clearRect(0,0,W,H);
                     ctx.strokeStyle = '#d0d7e0';
                     ctx.lineWidth = 1;
@@ -119,24 +126,21 @@
                     ctx.lineTo(PAD, H-PAD);
                     ctx.lineTo(W-PAD, H-PAD);
                     ctx.stroke();
-                    // labels
                     ctx.fillStyle = '#4b5563';
                     ctx.font = '12px sans-serif';
                     ctx.fillText(max.toFixed(2), 4, PAD+4);
                     ctx.fillText(min.toFixed(2), 4, H-PAD-4);
-                    // line
                     ctx.strokeStyle = '#4BA3C7';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
-                    var n = values.length;
+                    var n = eqValues.length;
                     for (var i=0;i<n;i++){
                         var x = PAD + (i * (W - 2*PAD) / (n-1));
-                        var y = H - PAD - ((values[i]-min) * (H-2*PAD) / (max-min));
+                        var y = H - PAD - ((eqValues[i]-min) * (H-2*PAD) / (max-min));
                         if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
                     }
                     ctx.stroke();
                 })();
-                /*]]>*/
                 </script>
             </div>
 

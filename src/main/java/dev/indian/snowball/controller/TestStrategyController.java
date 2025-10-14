@@ -28,7 +28,8 @@ public class TestStrategyController {
         List<StrategyDTO> strategies = strategyService.getAllStrategies();
         List<WatchlistDisplayDTO> watchlist = watchlistService.getAllDisplay();
         model.addAttribute("strategies", strategies);
-        model.addAttribute("watchlist", watchlist);
+        // Expose size for display instead of asking user to pick an instrument
+        model.addAttribute("watchlistSize", watchlist.size());
         // Defaults
         model.addAttribute("fromDate", LocalDate.now().minusMonths(6));
         model.addAttribute("toDate", LocalDate.now());
@@ -37,21 +38,26 @@ public class TestStrategyController {
 
     @PostMapping("/test-strategy")
     public String backtestStrategy(@RequestParam("strategyId") Long strategyId,
-                                   @RequestParam("instrumentToken") String instrumentToken,
                                    @RequestParam("fromDate") String fromDate,
                                    @RequestParam("toDate") String toDate,
                                    Model model) {
         List<StrategyDTO> strategies = strategyService.getAllStrategies();
         List<WatchlistDisplayDTO> watchlist = watchlistService.getAllDisplay();
         model.addAttribute("strategies", strategies);
-        model.addAttribute("watchlist", watchlist);
+        model.addAttribute("watchlistSize", watchlist.size());
         // Preserve selections
         model.addAttribute("selectedStrategyId", strategyId);
-        model.addAttribute("selectedInstrumentToken", instrumentToken);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
 
-        BacktestReport report = backtestService.runBacktest(strategyId, List.of(instrumentToken), LocalDate.parse(fromDate), LocalDate.parse(toDate), 0d, 0d);
+        BacktestReport report = backtestService.runBacktest(
+                strategyId,
+                watchlist.stream().map(WatchlistDisplayDTO::getInstrumentToken).toList(),
+                LocalDate.parse(fromDate),
+                LocalDate.parse(toDate),
+                0d,
+                0d
+        );
         model.addAttribute("report", report);
         return "test-strategy";
     }

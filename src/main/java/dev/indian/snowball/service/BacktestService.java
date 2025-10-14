@@ -100,13 +100,14 @@ public class BacktestService {
         }
         perTradePct = Math.min(Math.max(perTradePct, 0.0001), 1.0);
         double[] cashHolder = new double[]{initialCapital};
-        if (instruments == null || instruments.isEmpty()) {
+        if (instruments.isEmpty()) {
             return getEmptyReport(initialCapital);
         }
         List<BacktestTrade> trades = new ArrayList<>();
         Map<Long, OpenPosition> openPositions = new HashMap<>();
         Set<LocalDate> allDates = new TreeSet<>();
         Map<Long, Map<LocalDate, Double>> closePriceCache = new HashMap<>();
+        String strategyName = null;
         for (Instrument instrument : instruments) {
             List<HistoricalData> data = fetchValidHistoricalData(instrument, fromDate, toDate);
             if (data.isEmpty()) continue;
@@ -116,13 +117,14 @@ public class BacktestService {
             closePriceCache.put(instrument.getInstrumentToken(), dateClose);
             Strategy ta4jStrategy = getBaseStrategy(strategyId, TA4JUtils.createBarSeries(instrument.getTradingSymbol(), data));
             if (ta4jStrategy == null) continue;
+            strategyName = ta4jStrategy.getName();
             trades.addAll(simulateTradesForInstrument(instrument, data, ta4jStrategy, fromDate, toDate, perTradePct, openPositions, allDates, cashHolder));
         }
         List<BacktestTrade> sortedTrades = trades.stream()
                 .sorted(Comparator.comparing(BacktestTrade::getExitDate, Comparator.nullsLast(LocalDate::compareTo)))
                 .toList();
         List<EquityPoint> equityCurve = buildEquityCurve(sortedTrades, initialCapital, closePriceCache);
-        return buildBacktestReport(strategyId, initialCapital, sortedTrades, equityCurve, fromDate, toDate);
+        return buildBacktestReport(strategyName, initialCapital, sortedTrades, equityCurve, fromDate, toDate);
     }
 
     /**
@@ -267,7 +269,7 @@ public class BacktestService {
     /**
      * Builds the final BacktestReport from trades and equity curve.
      */
-    private BacktestReport buildBacktestReport(Long strategyId, double initialCapital, List<BacktestTrade> trades, List<EquityPoint> equityCurve, LocalDate fromDate, LocalDate toDate) {
+    private BacktestReport buildBacktestReport(String strategyName, double initialCapital, List<BacktestTrade> trades, List<EquityPoint> equityCurve, LocalDate fromDate, LocalDate toDate) {
         double profitSum = trades.stream().mapToDouble(BacktestTrade::getProfit).sum();
         double endingCapital = initialCapital + profitSum;
         if (!equityCurve.isEmpty()) {
@@ -283,7 +285,7 @@ public class BacktestService {
         double years = days / 365.25;
         double cagr = years > 0 ? (Math.pow(endingCapital / initialCapital, 1 / years) - 1) * 100 : 0;
         BacktestReport report = new BacktestReport();
-        report.setStrategyName(strategyId != null ? strategyId.toString() : "");
+        report.setStrategyName(strategyName);
         report.setStartingCapital(initialCapital);
         report.setEndingCapital(endingCapital);
         report.setNetProfit(netProfit);
@@ -318,7 +320,7 @@ public class BacktestService {
         }
         Rule buyRule = ruleParser.parseBuy(tradingStrategy, series);
         Rule sellRule = ruleParser.parseSell(tradingStrategy, series);
-        return new BaseStrategy(buyRule, sellRule);
+        return new BaseStrategy(tradingStrategy.getName(), buyRule, sellRule);
     }
 
     // Stub for loading historical data
